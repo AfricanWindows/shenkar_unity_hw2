@@ -7,6 +7,8 @@ public class PlayerDeath : MonoBehaviour
 
     private Vector3 startPositon;
 
+    private PlayerInvincible invincible;
+
     private void OnEnable()
     {
         SC_Death.OnSpikeCollision += OnSpikeCollision;
@@ -20,6 +22,7 @@ public class PlayerDeath : MonoBehaviour
     void Awake()
     {
         startPositon = transform.position;
+        invincible = GetComponent<PlayerInvincible>();
     }
 
     public void Respawn()
@@ -30,6 +33,9 @@ public class PlayerDeath : MonoBehaviour
     /// <summary>Kills Mario: respawn + tell everyone (PlayerLives listens).</summary>
     public void Kill()
     {
+        if (invincible != null && invincible.IsInvincible)
+            return;
+
         Respawn();
 
         if (OnPlayerDied != null)
