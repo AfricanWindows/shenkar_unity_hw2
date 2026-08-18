@@ -1,15 +1,10 @@
 using UnityEngine;
 
-public class StarController : MonoBehaviour
+/// <summary>The star: gives Mario temporary invincibility.</summary>
+public class StarController : BasePickable
 {
-     void OnTriggerEnter2D(Collider2D col)
+    protected override IPowerUp CreatePowerUp()
     {
-        Debug.Log("OnCollisionEnter2D " + col.gameObject.name);
-        if (col.gameObject.tag == "Player")
-        {
-            Debug.Log("Mario Collision!");
-            this.gameObject.SetActive(false);
-            col.gameObject.GetComponent<PlayerPowerUp>().CollectPowerUp(new StarPowerUp());
-        }
+        return new StarPowerUp();
     }
 }

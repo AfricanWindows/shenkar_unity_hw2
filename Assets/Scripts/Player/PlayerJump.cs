@@ -1,44 +1,44 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerJump  : MonoBehaviour
+/// <summary>
+/// Reads the jump input and pushes Mario up. It does not decide what "ground" is -
+/// that is GroundCheck's job - so Mario can jump off anything solid, spikes included.
+/// </summary>
+[RequireComponent(typeof(GroundCheck))]
+public class PlayerJump : MonoBehaviour
 {
-      public float jumpSpeed = 100;
-      private bool isJumping = false;
+    public float jumpSpeed = 100;
 
-      private Rigidbody2D rigid; 
-      private void OnEnable()
-    {
-        SC_Floor.OnFloorCollision += OnFloorCollision;
-    }
+    [Tooltip("Stops one key press from firing twice before physics reports us airborne.")]
+    [SerializeField] private float jumpCooldown = 0.15f;
 
-    private void OnDisable()
-    {
-        SC_Floor.OnFloorCollision -= OnFloorCollision;
-    }
-    
-     void Awake()
+    private Rigidbody2D rigid;
+    private IGroundCheck groundCheck;
+
+    private float nextJumpTime;
+
+    void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
+        groundCheck = GetComponent<IGroundCheck>();
     }
+
     private void Update()
     {
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
             Jump();
     }
-    
-    private void OnFloorCollision()
-    {
-        isJumping = false;
-    }
 
     private void Jump()
     {
-        if (isJumping == false)
-        {
-            rigid.AddForce(new Vector2(0, jumpSpeed));
-            isJumping = true;
-        }
-    }
+        if (rigid == null || groundCheck == null)
+            return;
 
+        if (!groundCheck.IsGrounded || Time.time < nextJumpTime)
+            return;
+
+        nextJumpTime = Time.time + jumpCooldown;
+        rigid.AddForce(new Vector2(0, jumpSpeed));
+    }
 }

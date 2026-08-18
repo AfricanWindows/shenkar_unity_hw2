@@ -7,7 +7,7 @@ public class PlayerDeath : MonoBehaviour
 
     private Vector3 startPositon;
 
-    private PlayerInvincible invincible;
+    private IInvincible[] invincibilitySources;
 
     private void OnEnable()
     {
@@ -22,7 +22,7 @@ public class PlayerDeath : MonoBehaviour
     void Awake()
     {
         startPositon = transform.position;
-        invincible = GetComponent<PlayerInvincible>();
+        invincibilitySources = GetComponents<IInvincible>();
     }
 
     public void Respawn()
@@ -33,13 +33,28 @@ public class PlayerDeath : MonoBehaviour
     /// <summary>Kills Mario: respawn + tell everyone (PlayerLives listens).</summary>
     public void Kill()
     {
-        if (invincible != null && invincible.IsInvincible)
+        if (IsInvincible())
             return;
 
         Respawn();
 
         if (OnPlayerDied != null)
             OnPlayerDied();
+    }
+
+    /// <summary>
+    /// True while ANY invincibility source is active - the star today,
+    /// a shield or a hit-cooldown tomorrow, with no change needed here.
+    /// </summary>
+    private bool IsInvincible()
+    {
+        for (int i = 0; i < invincibilitySources.Length; i++)
+        {
+            if (invincibilitySources[i].IsInvincible)
+                return true;
+        }
+
+        return false;
     }
 
     private void OnSpikeCollision()

@@ -1,33 +1,22 @@
-using System.Collections;
 using UnityEngine;
 
-public class PlayerInvincible : MonoBehaviour
+/// <summary>
+/// The player's invincibility STATE and nothing else.
+/// The countdown lives in TimedPlayerEffect, the red tint lives in TimedEffectView.
+/// RequireComponent makes Unity add that view automatically, so the visual
+/// can never be forgotten in the scene.
+/// </summary>
+[RequireComponent(typeof(TimedEffectView))]
+public class PlayerInvincible : TimedPlayerEffect, IInvincible
 {
-    private bool _isInvincible = false;
-    public bool IsInvincible { get { return _isInvincible; } }
-
-    public float powerUpDuration = 5f; // Duration of invincibility in seconds
-
-    private SpriteRenderer _spriteRenderer; 
-
-    void Awake()
+    public bool IsInvincible
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
+        get { return IsActive; }
     }
 
+    /// <summary>Entry point used by StarPowerUp.</summary>
     public void ActivateInvincibility()
     {
-        Debug.Log("Invincibility activated for " + gameObject.name);
-        StartCoroutine(InvincibilityCoroutine());   
-    }
-
-    private IEnumerator InvincibilityCoroutine()
-    {
-        _isInvincible = true;
-        _spriteRenderer.color = Color.red;
-        yield return new WaitForSeconds(powerUpDuration);
-        _spriteRenderer.color = Color.white;
-        _isInvincible = false;
-        Debug.Log("Invincibility ended for " + gameObject.name);
+        Activate();
     }
 }
