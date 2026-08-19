@@ -75,7 +75,14 @@ public class BuildLevel : EditorWindow
     {
         try
         {
-            GameObject temp = Instantiate(Resources.Load("Tiles/" + prefabName)) as GameObject;
+            GameObject prefab = Resources.Load<GameObject>("Tiles/" + prefabName);
+            if(prefab == null)
+            {
+                Debug.LogError("Prefab not found: Assets/Resources/Tiles/" + prefabName + ".prefab");
+                return;
+            }
+
+            GameObject temp = Instantiate(prefab);
             int colCalc = index % width;
             string col = colCalc.ToString();
             if(colCalc < 10)

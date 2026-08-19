@@ -87,7 +87,14 @@ public class PrefabSpawnerWindow : EditorWindow
         _prefabDictionary = new Dictionary<string, GameObject>();
         foreach (string n in _dropDownOptions)
         {
-            _prefabDictionary.Add(n,Resources.Load<GameObject>("Tiles/" + n));
+            GameObject prefab = Resources.Load<GameObject>("Tiles/" + n);
+            if(prefab == null)
+            {
+                Debug.LogError("Prefab not found: Assets/Resources/Tiles/" + n + ".prefab");
+                continue;
+            }
+
+            _prefabDictionary.Add(n,prefab);
         }
     }
 }

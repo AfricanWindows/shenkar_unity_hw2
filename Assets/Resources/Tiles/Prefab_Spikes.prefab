@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8488552863139289372}
   - component: {fileID: 2179515869161662462}
   m_Layer: 0
-  m_Name: Sprite_Spikes
+  m_Name: Prefab_Spikes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
