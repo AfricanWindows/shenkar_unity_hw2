@@ -2,48 +2,72 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// Shows any ICounter value in a TextMeshPro label.
-/// Works for coins, lives, axes... without changing this class.
+/// VIEW: shows any ICounter value in a TextMeshPro label.
+/// Works for coins, health, axes... without changing this class (Open/Closed).
+///
+/// It does NOT hold a reference to the counter object, because Mario is spawned by the
+/// Level Creator long after this label exists. It asks CounterRegistry for the id instead,
+/// and rebinds automatically as soon as a matching counter appears.
 /// </summary>
 public class UI_CounterView : MonoBehaviour
 {
-    [Tooltip("GameObject that holds a component implementing ICounter")]
-    [SerializeField] private GameObject counterSource;
+    [Tooltip("Which value this label shows")]
+    [SerializeField] private CounterId counterId = CounterId.Coins;
 
     [Tooltip("{0} is replaced by the counter value")]
     [SerializeField] private string format = "Coins: {0}";
 
+    [Tooltip("Text shown while the counter does not exist yet")]
+    [SerializeField] private int valueWhenMissing = 0;
+
     private TextMeshProUGUI label;
     private ICounter counter;
 
-    private void OnEnable()
+    private void Awake()
     {
         label = GetComponent<TextMeshProUGUI>();
 
-        if (counterSource != null)
-            counter = counterSource.GetComponent<ICounter>();
-
-        if (counter == null)
-        {
-            Debug.LogError("UI_CounterView: no ICounter found on counterSource", this);
-            return;
-        }
-
-        counter.OnValueChanged += SetValue;
-        SetValue(counter.Value);
+        if (label == null)
+            Debug.LogError("UI_CounterView: no TextMeshProUGUI on " + gameObject.name, this);
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        // Safety refresh: Awake order between scene objects is not guaranteed.
-        if (counter != null)
-            SetValue(counter.Value);
+        CounterRegistry.OnCounterRegistered += OnCounterRegistered;
+        Bind(CounterRegistry.Get(counterId));
     }
 
     private void OnDisable()
     {
+        CounterRegistry.OnCounterRegistered -= OnCounterRegistered;
+        Bind(null);
+    }
+
+    private void OnCounterRegistered(CounterId id, ICounter newCounter)
+    {
+        if (id == counterId)
+            Bind(newCounter);
+    }
+
+    private void Bind(ICounter newCounter)
+    {
+        if (counter == newCounter)
+            return;
+
         if (counter != null)
             counter.OnValueChanged -= SetValue;
+
+        counter = newCounter;
+
+        if (counter != null)
+        {
+            counter.OnValueChanged += SetValue;
+            SetValue(counter.Value);
+        }
+        else
+        {
+            SetValue(valueWhenMissing);
+        }
     }
 
     private void SetValue(int value)

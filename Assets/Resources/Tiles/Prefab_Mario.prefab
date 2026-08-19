@@ -62,11 +62,12 @@ GameObject:
   - component: {fileID: 3359937561198789224}
   - component: {fileID: 592943691413432077}
   - component: {fileID: 8873089182268222167}
-  - component: {fileID: 6767395641230156548}
   - component: {fileID: 7283692372685038136}
   - component: {fileID: 5047819289138867168}
   - component: {fileID: 6942123141145400039}
   - component: {fileID: 7744630716903715262}
+  - component: {fileID: -2830456190350644868}
+  - component: {fileID: -4827570216271636425}
   m_Layer: 0
   m_Name: Prefab_Mario
   m_TagString: Player
@@ -266,19 +267,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 656c57edeb17c2d41a94dd78a9e02cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerPowerUp
---- !u!114 &6767395641230156548
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2221766608174617449}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83bd3eea7d12afc4fb908b5a19ffb5d9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerLives
-  startLives: 3
 --- !u!114 &7283692372685038136
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -316,8 +304,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d44372c2ffbce854c852238f04abbe73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TimedEffectView
-  effect: {fileID: 0}
-  targetRenderer: {fileID: 0}
+  effect: {fileID: 5047819289138867168}
+  targetRenderer: {fileID: 4374668689619199194}
   activeColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &7744630716903715262
 MonoBehaviour:
@@ -332,6 +320,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GroundCheck
   minGroundNormal: 0.5
+--- !u!114 &-2830456190350644868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2221766608174617449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8401fad0bfe50b43b93bfdff81715d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthController
+  maxHealth: 3
+  startHealth: 3
+--- !u!114 &-4827570216271636425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2221766608174617449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25707862cf5ea0a468c8a8b4d3ee8eef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpeedBoost
+  duration: 5
+  speedBonus: 0.5
 --- !u!1 &6391805120359113288
 GameObject:
   m_ObjectHideFlags: 0

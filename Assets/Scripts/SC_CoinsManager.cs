@@ -15,11 +15,15 @@ public class SC_CoinsManager : MonoBehaviour, ICounter
     private void OnEnable()
     {
         SC_Coin.OnCoinCollision += OnCoinCollision;
+
+        // Tell the UI where to find this counter (see CounterRegistry).
+        CounterRegistry.Register(CounterId.Coins, this);
     }
 
     private void OnDisable()
     {
         SC_Coin.OnCoinCollision -= OnCoinCollision;
+        CounterRegistry.Unregister(CounterId.Coins, this);
     }
 
     private void OnCoinCollision()

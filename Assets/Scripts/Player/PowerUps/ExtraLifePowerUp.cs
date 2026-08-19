@@ -1,5 +1,6 @@
 using UnityEngine;
 
+/// <summary>The strike pickable: gives Mario a health point back, same as a heart.</summary>
 public class ExtraLifePowerUp : IPowerUp
 {
     private readonly int amount;
@@ -14,13 +15,13 @@ public class ExtraLifePowerUp : IPowerUp
         if (player == null)
             return;
 
-        PlayerLives playerLives = player.GetComponent<PlayerLives>();
-        if (playerLives == null)
+        PlayerHealthController health = player.GetComponent<PlayerHealthController>();
+        if (health == null)
         {
-            Debug.LogWarning("ExtraLifePowerUp: no PlayerLives on " + player.name);
+            Debug.LogWarning("ExtraLifePowerUp: no PlayerHealthController on " + player.name);
             return;
         }
 
-        playerLives.AddLives(amount);
+        health.AddHealth(amount);
     }
 }

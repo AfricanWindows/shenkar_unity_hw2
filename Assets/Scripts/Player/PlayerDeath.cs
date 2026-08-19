@@ -30,7 +30,7 @@ public class PlayerDeath : MonoBehaviour
         transform.position = startPositon;
     }
 
-    /// <summary>Kills Mario: respawn + tell everyone (PlayerLives listens).</summary>
+    /// <summary>Kills Mario: respawn + tell everyone (PlayerHealthController listens).</summary>
     public void Kill()
     {
         if (IsInvincible())

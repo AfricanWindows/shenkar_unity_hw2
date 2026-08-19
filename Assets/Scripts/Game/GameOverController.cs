@@ -3,13 +3,14 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Listens for "no lives left", shows the Game Over screen and restarts the level.
-/// It does not count anything itself - that is PlayerLives' job.
+/// Listens for "no health left", shows the Game Over screen and restarts the level.
+/// It counts nothing itself - that is the health MODEL's job.
+///
+/// It subscribes to a STATIC event instead of holding a reference to Mario, because
+/// Mario is created by the Level Creator and does not exist when this object wakes up.
 /// </summary>
 public class GameOverController : MonoBehaviour
 {
-    [SerializeField] private PlayerLives playerLives;
-
     [Tooltip("Panel with the GAME OVER text. Hidden while playing.")]
     [SerializeField] private GameObject gameOverPanel;
 
@@ -19,26 +20,21 @@ public class GameOverController : MonoBehaviour
 
     private void OnEnable()
     {
-        if (playerLives != null)
-            playerLives.OnAllLivesLost += OnAllLivesLost;
+        PlayerHealthController.OnPlayerHealthEmpty += OnHealthEmpty;
     }
 
     private void OnDisable()
     {
-        if (playerLives != null)
-            playerLives.OnAllLivesLost -= OnAllLivesLost;
+        PlayerHealthController.OnPlayerHealthEmpty -= OnHealthEmpty;
     }
 
     private void Start()
     {
-        if (playerLives == null)
-            Debug.LogError("GameOverController: playerLives is not assigned", this);
-
         if (gameOverPanel != null)
             gameOverPanel.SetActive(false);
     }
 
-    private void OnAllLivesLost()
+    private void OnHealthEmpty()
     {
         if (isGameOver)
             return;
@@ -62,6 +58,10 @@ public class GameOverController : MonoBehaviour
         RestartLevel();
     }
 
+    /// <summary>
+    /// Reloading the scene is what "reset every object of the level" means:
+    /// coins, hearts, enemies and Mario all come back in their starting state.
+    /// </summary>
     private void RestartLevel()
     {
         Scene current = SceneManager.GetActiveScene();

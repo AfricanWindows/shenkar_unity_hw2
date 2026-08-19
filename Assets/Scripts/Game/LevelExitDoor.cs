@@ -5,14 +5,22 @@ using UnityEngine;
 /// Exercise item 8: the door that ends the level - but only if Mario
 /// already collected the key. It only DETECTS; showing the win screen
 /// is LevelCompleteController's job.
+///
+/// The event is STATIC so that any door placed by the Level Creator works,
+/// without anybody having to drag a reference in the Inspector.
 /// </summary>
 public class LevelExitDoor : MonoBehaviour
 {
     [SerializeField] private string playerTag = "Player";
 
-    public event Action OnLevelCompleted;
+    public static event Action OnLevelCompleted;
 
     private bool completed = false;
+
+    private void OnEnable()
+    {
+        completed = false;
+    }
 
     private void OnTriggerEnter2D(Collider2D col)
     {

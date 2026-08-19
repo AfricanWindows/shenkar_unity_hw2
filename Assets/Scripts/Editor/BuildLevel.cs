@@ -8,6 +8,7 @@ public class BuildLevel : EditorWindow
 {
     private TextAsset _curLevel;
     private GameObject _world;
+    private bool _showPalette = true;
 
     [MenuItem("Tools/Level Creator")]
     public static void ShowWindow()
@@ -28,6 +29,33 @@ public class BuildLevel : EditorWindow
         {
             CreateLevel();
         }
+
+        EditorGUILayout.Space();
+        DrawPaletteTable();
+    }
+
+    /// <summary>
+    /// Shows which tile code creates which prefab. Tiled numbers the tiles by their
+    /// position in the tileset image (left to right, top to bottom, starting at 1),
+    /// so the images in MarioTileSet must be placed in exactly this order.
+    /// </summary>
+    private void DrawPaletteTable()
+    {
+        _showPalette = EditorGUILayout.Foldout(_showPalette,"Tile Codes (order of the Tiled tileset)",true);
+        if(!_showPalette)
+            return;
+
+        string[] names = TilePalette.GetAllPrefabNames();
+
+        EditorGUI.indentLevel++;
+        for(int i = 0; i < names.Length; i++)
+        {
+            bool exists = Resources.Load<GameObject>("Tiles/" + names[i]) != null;
+            string label = names[i] + (exists ? "" : "   (prefab missing)");
+
+            EditorGUILayout.LabelField(new GUIContent((i + 1).ToString()),new GUIContent(label));
+        }
+        EditorGUI.indentLevel--;
     }
 
     private void CreateLevel()
@@ -51,16 +79,13 @@ public class BuildLevel : EditorWindow
                     Debug.Log(levelTiles.Count);
                     for(int i=0; i < levelTiles.Count;i++)
                     {
-                       // Debug.Log(levelTiles[i].ToString());
-                        switch(levelTiles[i].ToString())
-                        {
-                            case "1":CreateGameObject("Prefab_Floor",i,height,width);break;
-                            case "2":CreateGameObject("Prefab_Mario",i,height,width);break;
-                            case "3":CreateGameObject("Prefab_Coin",i,height,width);break;
-                            case "4":CreateGameObject("Prefab_Flower",i,height,width);break;
-                            case "5":CreateGameObject("Prefab_Star",i,height,width);break;
-                            case "6":CreateGameObject("Prefab_Spikes",i,height,width);break;
-                        }
+                        int tileCode;
+                        if(!int.TryParse(levelTiles[i].ToString(), out tileCode))
+                            continue;
+
+                        string prefabName = TilePalette.GetPrefabName(tileCode);
+                        if(prefabName != null)
+                            CreateGameObject(prefabName,i,height,width);
                     }
                 }
             }
@@ -82,7 +107,14 @@ public class BuildLevel : EditorWindow
                 return;
             }
 
-            GameObject temp = Instantiate(prefab);
+            // PrefabUtility keeps the link to the prefab, plain Instantiate does not.
+            // Without the link, later edits of Prefab_Mario would never reach the level.
+            GameObject temp = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+            if(temp == null)
+                return;
+
+            Undo.RegisterCreatedObjectUndo(temp,"Create Level");
+
             int colCalc = index % width;
             string col = colCalc.ToString();
             if(colCalc < 10)

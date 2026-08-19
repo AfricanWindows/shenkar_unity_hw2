@@ -22,6 +22,18 @@ public class AxeWeapon : MonoBehaviour, IReloadWeapon, ICounter
         ammo = startAmmo;
     }
 
+    private void OnEnable()
+    {
+        // Tell the UI where to find this counter (see CounterRegistry).
+        CounterRegistry.Register(CounterId.Axes, this);
+        RaiseValueChanged();
+    }
+
+    private void OnDisable()
+    {
+        CounterRegistry.Unregister(CounterId.Axes, this);
+    }
+
     public void Attack()
     {
         if (projectile == null || ammo <= 0)

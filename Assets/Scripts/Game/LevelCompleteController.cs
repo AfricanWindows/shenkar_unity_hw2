@@ -1,33 +1,29 @@
 using UnityEngine;
 
 /// <summary>
-/// Shows the "LEVEL COMPLETE" screen when the door reports the level is finished.
+/// Shows the "LEVEL COMPLETE" screen when a door reports the level is finished.
 /// The door only detects - showing the screen is this class' job.
+///
+/// It listens to a STATIC event, so it works with a door created by the Level Creator
+/// and does not need a reference to an object that did not exist at edit time.
 /// </summary>
 public class LevelCompleteController : MonoBehaviour
 {
-    [SerializeField] private LevelExitDoor door;
-
     [Tooltip("Panel with the LEVEL COMPLETE text. Hidden while playing.")]
     [SerializeField] private GameObject levelCompletePanel;
 
     private void OnEnable()
     {
-        if (door != null)
-            door.OnLevelCompleted += OnLevelCompleted;
+        LevelExitDoor.OnLevelCompleted += OnLevelCompleted;
     }
 
     private void OnDisable()
     {
-        if (door != null)
-            door.OnLevelCompleted -= OnLevelCompleted;
+        LevelExitDoor.OnLevelCompleted -= OnLevelCompleted;
     }
 
     private void Start()
     {
-        if (door == null)
-            Debug.LogError("LevelCompleteController: door is not assigned", this);
-
         if (levelCompletePanel != null)
             levelCompletePanel.SetActive(false);
     }
