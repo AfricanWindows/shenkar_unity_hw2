@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Liskov demo: the base weapon every other weapon must be able to replace.
+/// </summary>
 public class BaseWeapon
 {
     private int range = 5;
@@ -10,15 +13,3 @@ public class BaseWeapon
         Debug.Log("BaseWeapon Attack, " + range + "," + damage);
     }
 }
-
-public class LightningWeapon : BaseWeapon
-{
-    bool isLightOn = false;
-    public override void Attack()
-    {
-        Debug.Log("LongRangeWeapon " + isLightOn);
-       base.Attack();
-    }
-}
-
-

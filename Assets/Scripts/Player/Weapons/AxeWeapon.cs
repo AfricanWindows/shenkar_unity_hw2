@@ -3,12 +3,13 @@ using UnityEngine;
 
 public class AxeWeapon : MonoBehaviour, IReloadWeapon, ICounter
 {
-    public GameObject projectile;
+    [SerializeField] private GameObject projectile;
 
     [Tooltip("How many axes Mario starts the level with")]
     [SerializeField] private int startAmmo = 0;
 
     private int ammo;
+    private IFacing facing;
 
     public int Value
     {
@@ -20,6 +21,9 @@ public class AxeWeapon : MonoBehaviour, IReloadWeapon, ICounter
     private void Awake()
     {
         ammo = startAmmo;
+
+        // Asks the owner which way he looks - it never reads his scale itself.
+        facing = GetComponentInParent<IFacing>();
     }
 
     private void OnEnable()
@@ -39,15 +43,10 @@ public class AxeWeapon : MonoBehaviour, IReloadWeapon, ICounter
         if (projectile == null || ammo <= 0)
             return;
 
-        GameObject curProjectile = Instantiate(projectile, transform.position, new Quaternion(0, 0, 0, 0));
+        GameObject curProjectile = Instantiate(projectile, transform.position, Quaternion.identity);
         ProjectileAxe scProjectile = curProjectile.GetComponent<ProjectileAxe>();
         if (scProjectile != null)
-        {
-            float direction = 1;
-            if (transform.parent != null)
-                direction = transform.parent.localScale.x;
-            scProjectile.Attack(direction);
-        }
+            scProjectile.Attack(facing != null ? facing.FacingDirection : 1f);
 
         ammo--;
         RaiseValueChanged();

@@ -92,7 +92,8 @@ public class BuildLevel : EditorWindow
         }
         catch(Exception e)
         {
-            Debug.Log(e.Message);
+            // LogException keeps the stack trace and shows up as an error, not as a plain log.
+            Debug.LogException(e);
         }
     }
 
@@ -131,7 +132,8 @@ public class BuildLevel : EditorWindow
         }
         catch(Exception e)
         {
-            Debug.Log(e.Message);
+            // LogException keeps the stack trace and shows up as an error, not as a plain log.
+            Debug.LogException(e);
         }
     }
 }

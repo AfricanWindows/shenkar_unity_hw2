@@ -9,12 +9,6 @@ public class TestBaseWeapon : MonoBehaviour
         LightningWeapon bslw = new LightningWeapon();
         AttackEnemy(bslw);
     }
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void AttackEnemy(BaseWeapon attackingWeapon)
     {
         attackingWeapon.Attack();

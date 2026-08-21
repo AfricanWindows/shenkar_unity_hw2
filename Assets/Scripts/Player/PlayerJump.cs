@@ -8,7 +8,8 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(GroundCheck))]
 public class PlayerJump : MonoBehaviour
 {
-    public float jumpSpeed = 100;
+    [Tooltip("Upward force of a jump")]
+    [SerializeField] private float jumpSpeed = 100;
 
     [Tooltip("Stops one key press from firing twice before physics reports us airborne.")]
     [SerializeField] private float jumpCooldown = 0.15f;

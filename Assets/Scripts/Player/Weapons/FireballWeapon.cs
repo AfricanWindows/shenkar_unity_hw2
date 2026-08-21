@@ -1,24 +1,27 @@
 using UnityEngine;
 
-public class FireballWeapon : MonoBehaviour,IUseableWeapon
+public class FireballWeapon : MonoBehaviour, IUseableWeapon
 {
-    public GameObject projectile;
+    [SerializeField] private GameObject projectile;
+
     private bool _isEquip = false;
+    private IFacing facing;
+
+    private void Awake()
+    {
+        // Asks the owner which way he looks - it never reads his scale itself.
+        facing = GetComponentInParent<IFacing>();
+    }
 
     public void Attack()
     {
-        if (projectile != null && _isEquip)
-        {
-            GameObject curProjectile = Instantiate(projectile, transform.position, new Quaternion(0, 0, 0, 0));
-            ProjectileFireball scProjectile =  curProjectile.GetComponent<ProjectileFireball>();
-            if(scProjectile != null)
-            {
-                float direction = 1;
-                if(transform.parent != null)
-                    direction = transform.parent.localScale.x;
-                scProjectile.Attack(direction);
-            }
-        }
+        if (projectile == null || !_isEquip)
+            return;
+
+        GameObject curProjectile = Instantiate(projectile, transform.position, Quaternion.identity);
+        ProjectileFireball scProjectile = curProjectile.GetComponent<ProjectileFireball>();
+        if (scProjectile != null)
+            scProjectile.Attack(facing != null ? facing.FacingDirection : 1f);
     }
 
     public void Equip()
