@@ -2,6 +2,12 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+/// <summary>
+/// Places and removes level tiles directly in the Scene view.
+/// Left click adds the selected prefab, right click deletes the object under the cursor.
+///
+/// The list of prefabs comes from TilePalette, so a new tile shows up here by itself.
+/// </summary>
 public class PrefabSpawnerWindow : EditorWindow
 {
     private static bool _isSpawningEnabled = false;
@@ -58,40 +64,89 @@ public class PrefabSpawnerWindow : EditorWindow
             LoadPrefabs();
 
         GUILayout.Label("Prefab Spawning Status: " + (_isSpawningEnabled ? "<color=yellow>Enabled</color>" : "<color=red>Disabled</color>"), _labelStyle);
+
+        EditorGUILayout.Space();
+        EditorGUILayout.HelpBox(_isSpawningEnabled
+            ? "Left click in the Scene = add the selected prefab.\nRight click in the Scene = delete the object under the cursor.\nNormal selection is off while this is Enabled."
+            : "Spawning is off. Press Toggle Prefab Spawning to start placing tiles.",
+            MessageType.Info);
     }
 
     private void TogglePrefabSpawning()
     {
        _isSpawningEnabled = !_isSpawningEnabled;
+       SceneView.RepaintAll();
     }
 
     private void OnSceneGUI(SceneView sceneView)
     {
-        if(_isSpawningEnabled && _prefabDictionary != null &&
-            _selectedIndex < _dropDownOptions.Length &&
-            _prefabDictionary.ContainsKey(_dropDownOptions[_selectedIndex]))
+        if(!_isSpawningEnabled || _prefabDictionary == null)
+            return;
+
+        Event current = Event.current;
+
+        // Take over the mouse, otherwise Unity selects objects on left click and opens
+        // its context menu on right click before we ever see the event.
+        if(current.type == EventType.Layout)
+            HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
+
+        if(current.type != EventType.MouseDown)
+            return;
+
+        if(current.button == 0)
         {
-            Event current = Event.current;
-            if(current.type == EventType.MouseDown && current.button == 1)
-            {
-                Debug.Log("_selectedIndex " + _selectedIndex);
-                Ray ray = HandleUtility.GUIPointToWorldRay(current.mousePosition);
-                Vector3 mouseWorldPos = ray.origin;
-                Vector3 mouseWorldPosRounded = new Vector3(Mathf.RoundToInt(mouseWorldPos.x), Mathf.RoundToInt(mouseWorldPos.y), 0);
-                // PrefabUtility keeps the link to the prefab, plain Instantiate does not.
-                GameObject spawned = PrefabUtility.InstantiatePrefab(
-                    _prefabDictionary[_dropDownOptions[_selectedIndex]]) as GameObject;
-
-                if(spawned != null)
-                {
-                    spawned.transform.position = mouseWorldPosRounded;
-                    Undo.RegisterCreatedObjectUndo(spawned,"Spawn " + spawned.name);
-                    Selection.activeGameObject = spawned;
-                }
-
-                Debug.Log("Mouse Position in Scene " + mouseWorldPosRounded);
-            }
+            SpawnAt(GetMouseCell(current.mousePosition));
+            current.Use();
         }
+        else if(current.button == 1)
+        {
+            DeleteAt(current.mousePosition);
+            current.Use();
+        }
+    }
+
+    /// <summary>Mouse position snapped to the tile grid.</summary>
+    private Vector3 GetMouseCell(Vector2 mousePosition)
+    {
+        Ray ray = HandleUtility.GUIPointToWorldRay(mousePosition);
+        Vector3 world = ray.origin;
+
+        return new Vector3(Mathf.RoundToInt(world.x), Mathf.RoundToInt(world.y), 0);
+    }
+
+    private void SpawnAt(Vector3 position)
+    {
+        if(_selectedIndex >= _dropDownOptions.Length)
+            return;
+
+        GameObject prefab = _prefabDictionary[_dropDownOptions[_selectedIndex]];
+
+        // PrefabUtility keeps the link to the prefab, plain Instantiate does not.
+        GameObject spawned = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+        if(spawned == null)
+            return;
+
+        spawned.transform.position = position;
+        Undo.RegisterCreatedObjectUndo(spawned,"Spawn " + spawned.name);
+        Selection.activeGameObject = spawned;
+    }
+
+    private void DeleteAt(Vector2 mousePosition)
+    {
+        GameObject picked = HandleUtility.PickGameObject(mousePosition,false);
+        if(picked == null)
+        {
+            Debug.Log("Prefab Spawner: nothing to delete under the cursor.");
+            return;
+        }
+
+        // Delete the whole tile, not just the child part that happened to be clicked.
+        GameObject root = PrefabUtility.GetOutermostPrefabInstanceRoot(picked);
+        if(root == null)
+            root = picked;
+
+        Debug.Log("Prefab Spawner: deleted " + root.name);
+        Undo.DestroyObjectImmediate(root);
     }
 
     private void LoadPrefabs()
