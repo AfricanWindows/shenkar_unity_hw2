@@ -21,11 +21,6 @@ public abstract class TimedPlayerEffect : MonoBehaviour
         get { return isActive; }
     }
 
-    public float Duration
-    {
-        get { return duration; }
-    }
-
     /// <summary>Raised with true when the effect starts, false when it ends.</summary>
     public event Action<bool> OnActiveChanged;
 

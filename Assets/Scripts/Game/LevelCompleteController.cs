@@ -20,6 +20,10 @@ public class LevelCompleteController : MonoBehaviour
     private void OnDisable()
     {
         LevelExitDoor.OnLevelCompleted -= OnLevelCompleted;
+
+        // Time.timeScale is global and survives a scene load. Leaving it at 0 here
+        // would freeze the NEXT level too, so it is always restored.
+        Time.timeScale = 1f;
     }
 
     private void Start()

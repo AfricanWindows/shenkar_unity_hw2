@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Moves Mario left and right.
+/// Moves Mario left and right, and carries him along when the floor under his feet
+/// is a moving platform.
 ///
 /// It OWNS its speed: no other class writes into the field from outside. A temporary
 /// boost is asked for through SetSpeedMultiplier, so the lightning effect never has to
@@ -17,6 +18,7 @@ public class PlayerMovement : MonoBehaviour, IFacing
     private float facingDirection = 1f;
     private float direction;
     private Rigidbody2D rigid;
+    private IPlatformProvider platformProvider;
 
     /// <summary>Speed actually used right now: normal speed times the active multiplier.</summary>
     public float CurrentSpeed
@@ -33,6 +35,7 @@ public class PlayerMovement : MonoBehaviour, IFacing
     private void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
+        platformProvider = GetComponent<IPlatformProvider>();
     }
 
     /// <summary>
@@ -45,21 +48,61 @@ public class PlayerMovement : MonoBehaviour, IFacing
 
     private void FixedUpdate()
     {
+        ReadInput();
+        ApplyMovement();
+    }
+
+    private void ReadInput()
+    {
         direction = 0f;
-        if (Keyboard.current != null)
-        {
-            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)
-                direction = -1f;
-            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)
-                direction = 1f;
-        }
 
-        if (direction != 0 && rigid != null)
-        {
-            rigid.linearVelocity = new Vector2(direction * CurrentSpeed, rigid.linearVelocity.y);
+        if (Keyboard.current == null)
+            return;
 
-            facingDirection = direction > 0 ? 1f : -1f;
+        if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)
+            direction = -1f;
+        if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)
+            direction = 1f;
+    }
+
+    private void ApplyMovement()
+    {
+        if (rigid == null)
+            return;
+
+        float platformSpeedX = GetPlatformSpeedX();
+
+        if (direction != 0f)
+        {
+            // Walking ON a platform means platform speed PLUS his own steps.
+            rigid.linearVelocity = new Vector2(platformSpeedX + direction * CurrentSpeed, rigid.linearVelocity.y);
+
+            facingDirection = direction > 0f ? 1f : -1f;
             transform.localScale = new Vector3(facingDirection, 1, 1);
+            return;
         }
+
+        // Standing still on a platform: match its speed exactly, so he keeps the spot
+        // he is standing on. The velocity is REWRITTEN every step, which is also why
+        // friction can no longer drag him a second time.
+        if (platformSpeedX != 0f)
+            rigid.linearVelocity = new Vector2(platformSpeedX, rigid.linearVelocity.y);
+    }
+
+    /// <summary>
+    /// Horizontal speed of the floor under our feet, or 0 on normal ground.
+    /// The platform is only asked HOW FAR it moved - it never pushes us itself,
+    /// so a lift or a conveyor needs no change here.
+    /// </summary>
+    private float GetPlatformSpeedX()
+    {
+        if (platformProvider == null)
+            return 0f;
+
+        IRideablePlatform platform = platformProvider.CurrentPlatform;
+        if (platform == null)
+            return 0f;
+
+        return platform.Delta.x / Time.fixedDeltaTime;
     }
 }

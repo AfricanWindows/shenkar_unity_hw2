@@ -26,6 +26,10 @@ public class GameOverController : MonoBehaviour
     private void OnDisable()
     {
         PlayerHealthController.OnPlayerHealthEmpty -= OnHealthEmpty;
+
+        // The coroutine may be killed mid freeze (scene load, object destroyed).
+        // timeScale is global, so it is always restored here.
+        Time.timeScale = 1f;
     }
 
     private void Start()

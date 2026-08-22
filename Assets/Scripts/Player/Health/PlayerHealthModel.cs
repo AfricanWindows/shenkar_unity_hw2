@@ -11,7 +11,7 @@ using System;
 /// There is no UnityEngine reference in this file on purpose: the model knows nothing
 /// about GameObjects, colliders or UI. That is exactly what makes it a Model.
 /// </summary>
-public class PlayerHealthModel
+public class PlayerHealthModel : IPlayerHealthModel
 {
     private readonly int maxHealth;
     private int currentHealth;
@@ -37,15 +37,13 @@ public class PlayerHealthModel
         get { return currentHealth >= maxHealth; }
     }
 
-    /// <summary>Raised with the new health value every time it changes.</summary>
-    public event Action<int> OnHealthChanged;
+    public event Action Changed;
 
-    /// <summary>Raised once when health reaches zero.</summary>
-    public event Action OnHealthEmpty;
+    public event Action Empty;
 
     /// <summary>
     /// Collecting a heart. Returns false when Mario is already at 3 hearts,
-    /// so the caller can decide to leave the heart on the level.
+    /// so the caller can tell that the heart had no effect.
     /// </summary>
     public bool Add(int amount)
     {
@@ -64,14 +62,8 @@ public class PlayerHealthModel
 
         SetHealth(currentHealth - amount);
 
-        if (currentHealth <= 0 && OnHealthEmpty != null)
-            OnHealthEmpty();
-    }
-
-    /// <summary>Back to full health, used when the level restarts.</summary>
-    public void ResetHealth()
-    {
-        SetHealth(maxHealth);
+        if (currentHealth <= 0 && Empty != null)
+            Empty();
     }
 
     private void SetHealth(int value)
@@ -82,8 +74,8 @@ public class PlayerHealthModel
 
         currentHealth = clamped;
 
-        if (OnHealthChanged != null)
-            OnHealthChanged(currentHealth);
+        if (Changed != null)
+            Changed();
     }
 
     private int Clamp(int value)

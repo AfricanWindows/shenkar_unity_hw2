@@ -18,7 +18,7 @@ public static class TilePalette
         "Prefab_Spikes",      //  6
         "Prefab_Axe",         //  7
         "Prefab_Key",         //  8
-        "Prefab_Strike",      //  9 - exercise 2: the heart that gives a health point
+        "Prefab_Heart",       //  9 - exercise 2: the heart that gives a health point
         "Prefab_Door",        // 10
         "Prefab_Goomba",      // 11
         "Prefab_Bowser",      // 12
